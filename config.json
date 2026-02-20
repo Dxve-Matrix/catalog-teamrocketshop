@@ -1,0 +1,34 @@
+{
+  "branding": {
+    "sellerName": "Team Rocket Shop",
+    "tagline": "Pokémon Live Seller 🇮🇹",
+    "logo": "images/logo.png"
+  },
+  
+  "social": {
+    "tiktok": "https://tiktok.com/@pokeliveitalia",
+    "instagram": "https://instagram.com/pokeliveitalia",
+    "discord": "",
+    "telegram": ""
+  },
+
+  "contact": {
+    "whatsapp": "https://wa.me/393401234567",
+    "paypalEmail": "pokelive@email.it"
+  },
+
+  "supabase": {
+    "url": "https://vsomlptqztbnjntedhva.supabase.co",
+    "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzb21scHRxenRibmpudGVkaHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYzMjkxOTIsImV4cCI6MjA4MTkwNTE5Mn0.xqRHeZGRzCXIxeK9rTgbAHJRO26Xzt-7XKu8_Cc2veg"
+  },
+
+  "admin": {
+    "allowedEmail": "seller1@internal.local"
+  },
+
+  "developer": {
+    "name": "BioLink Studio",
+    "link": "https://biolinkstudio.it/"
+  }
+}
+

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title id="pageTitle">Catalogo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/catalogo.css">
+    <link rel="stylesheet" href="css/modal.css">
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header class="topbar">
+        <div class="logo">
+            <a href="index.html" class="brand">
+                <img id="brandLogo" src="images/logo.png" alt="Brand">
+                <span class="brand-text" id="brandName">Brand</span>
+            </a>
+        </div>
+
+        <nav class="menu">
+            <a href="index.html">Home</a>
+            <a href="catalogo.html">Prodotti</a>
+        </nav>
+    </header>
+
+    <!-- CATALOGO -->
+    <main class="catalog-page">
+    
+        <!-- FILTRI -->
+        <section class="catalog-filters">
+    
+            <input type="text" id="catalogSearch" placeholder="Cerca prodotto..." oninput="loadProducts()" />
+    
+            <select id="filterTCG" onchange="loadProducts()">
+                <option value="">Tutti i TCG</option>
+                <option value="pokemon">Pokémon</option>
+            </select>
+    
+            <select id="filterLanguage" onchange="loadProducts()">
+                <option value="">Tutte le lingue</option>
+                <option value="ita">Italiano</option>
+                <option value="jpn">Giapponese</option>
+                <option value="chn">Cinese</option>
+            </select>
+    
+            <select id="filterType" onchange="loadProducts()">
+                <option value="">Tutti i tipi</option>
+                <option value="box">Box</option>
+                <option value="bustina">Bustina</option>
+                <option value="display">Display</option>
+                <option value="carta">Carta</option>
+                <option value="carta_gradata">Carta Gradata</option>
+            </select>
+    
+        </section>
+    
+        <!-- GRID PRODOTTI -->
+        <section class="product-grid" id="productGrid"></section>
+    
+    </main>
+
+    <!-- FOOTER DEV -->
+    <div style="
+      text-align:center;
+      font-size:11px;
+      opacity:.45;
+      padding:10px 0;
+    ">
+        Website developed by
+        <a id="developerLink" href="#" target="_blank" rel="noopener"
+            style="color:#38bdf8;text-decoration:none;font-weight:500;">
+            <span id="developerName">Your Studio</span>
+        </a>
+    </div>
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+    <script src="catalogo.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Pannello Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            font-family: system-ui;
+            padding: 20px;
+            background: black;
+            color: white;
+        }
+
+        h1,
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .btn-primary {
+            background: #38bdf8;
+            color: #000;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .15);
+            text-align: left;
+        }
+
+        th {
+            opacity: .8;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .7);
+        }
+
+        .modal-box {
+            background: #020617;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 420px;
+            margin: 80px auto;
+        }
+
+        .modal-box input,
+        .modal-box select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-filters {
+            margin: 14px 0 10px;
+        }
+
+        .admin-filters select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.25);
+            background: rgba(255,255,255,.08);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* FIX leggibilità SELECT + OPTIONS */
+        select {
+            background-color: #020617;
+            color: #ffffff;
+        }
+
+        select option {
+            background-color: #020617;
+            color: #ffffff;
+        }
+
+        /* quando un'opzione è selezionata */
+        select option:checked {
+            background-color: #38bdf8;
+            color: #020617;
+        }
+
+        /* hover (supportato da alcuni browser) */
+        select option:hover {
+            background-color: #1e293b;
+            color: #ffffff;
+        }
+
+        .admin-filters input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.25);
+            background: #020617;
+            color: #fff;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        /* ===============================
+        ADMIN TABLE – MOBILE CLEAN
+        ================================ */
+        @media (max-width: 768px) {
+
+        /* nascondi colonne inutili */
+        table th:nth-child(1),
+        table td:nth-child(1), /* Img */
+
+        table th:nth-child(4),
+        table td:nth-child(4), /* Categoria */
+
+        table th:nth-child(5),
+        table td:nth-child(5), /* Espansione */
+
+        table th:nth-child(6),
+        table td:nth-child(6), /* Quantità */
+
+        table th:nth-child(7),
+        table td:nth-child(7)  /* Visibile */ {
+            display: none;
+        }
+
+        table {
+            font-size: 14px;
+        }
+
+        td, th {
+            padding: 8px 6px;
+            vertical-align: middle;
+        }
+
+        /* Nome più leggibile */
+        table td:nth-child(2) {
+            font-weight: 700;
+        }
+
+        /* Prezzo compatto */
+        table td:nth-child(3) {
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        /* Azioni */
+        table td:nth-child(8) button {
+            padding: 6px 8px;
+            font-size: 14px;
+            margin-right: 4px;
+        }
+        }
+
+        /* ===============================
+   MODAL UPGRADE
+=============================== */
+
+#modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    backdrop-filter: blur(4px);
+}
+
+.modal-box {
+    background: #0f172a;
+    padding: 30px;
+    border-radius: 16px;
+    max-width: 600px;
+    margin: 60px auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,.6);
+    animation: fadeUp .2s ease-out;
+}
+
+.modal-box h3 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* Grid layout */
+.modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.modal-full {
+    grid-column: span 2;
+}
+
+.modal-box input,
+.modal-box select,
+.modal-box textarea {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: #020617;
+    color: #fff;
+    font-size: 14px;
+    transition: .2s ease;
+}
+
+.modal-box input:focus,
+.modal-box select:focus,
+.modal-box textarea:focus {
+    border-color: #38bdf8;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(56,189,248,.3);
+}
+
+/* Image preview */
+.image-preview {
+    width: 100%;
+    height: 120px;
+    border-radius: 10px;
+    background: #020617;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.1);
+}
+
+.image-preview img {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===============================
+   TOGGLE SWITCH
+=============================== */
+
+.switch-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #334155;
+    border-radius: 24px;
+    transition: .25s;
+}
+
+.slider:before {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    top: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .25s;
+}
+
+.switch input:checked + .slider {
+    background-color: #38bdf8;
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+/* ===============================
+   MYSTERY PREMIUM CARD
+=============================== */
+
+.mystery-card {
+    margin-top: 20px;
+    max-width: 750px;
+    background: linear-gradient(145deg, #0f172a, #020617);
+    border: 1px solid rgba(56,189,248,.25);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.6);
+}
+
+.mystery-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+}
+
+.field.full {
+    grid-column: span 2;
+}
+
+.field label {
+    font-size: 12px;
+    opacity: .6;
+    margin-bottom: 6px;
+    letter-spacing: .5px;
+}
+
+.mystery-card input,
+.mystery-card textarea {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: #020617;
+    color: #fff;
+    font-size: 14px;
+    transition: .2s ease;
+}
+
+.mystery-card input:focus,
+.mystery-card textarea:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56,189,248,.3);
+}
+
+.mystery-card textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.mystery-actions {
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+    </style>
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <h1>Pannello Admin</h1>
+        <button class="btn-danger" onclick="logout()">Logout</button>
+    </div>
+
+    <hr>    
+
+    <div style="margin-bottom:20px; display:flex; gap:10px;">
+        <button class="btn-primary" id="viewCatalogBtn" onclick="setView('catalog')">
+            Catalogo
+        </button>
+    
+        <button id="viewMysteryBtn" onclick="setView('mystery')">
+            Mystery
+        </button>
+    </div>
+
+    <div id="catalogSection">
+        <h2>Gestione Prodotti</h2>
+        <button class="btn-primary" onclick="openModal()">+ Nuovo prodotto</button>
+        
+        <div class="admin-filters">
+            <input type="text" id="adminSearch" placeholder="Cerca prodotto..." oninput="loadProducts()">
+        
+            <select id="adminTypeFilter" onchange="loadProducts()">
+                <option value="">Tutti i tipi</option>
+                <option value="bustina">Bustine</option>
+                <option value="display">Display</option>
+                <option value="box">Box</option>
+                <option value="etb">ETB</option>
+                <option value="collezione">Collezioni</option>
+            </select>
+        
+            <select id="adminLanguageFilter" onchange="loadProducts()">
+                <option value="">Tutte le lingue</option>
+                <option value="ita">🇮🇹 IT</option>
+                <option value="jpn">🇯🇵 JP</option>
+                <option value="chn">🇨🇳 CN</option>
+            </select>
+        
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Img</th>
+                    <th>Nome</th>
+                    <th>Prezzo</th>
+                    <th>Categoria</th>
+                    <th>Espansione</th>
+                    <th>Qtà</th>
+                    <th>Visibile</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody id="productsTable"></tbody>
+        </table>
+
+    </div>
+
+    <hr style="margin:40px 0">
+    
+
+    <div id="mysterySection" style="display:none;">
+
+        <h2 style="margin-top:50px;">Configurazione Mystery</h2>
+        
+        <div class="mystery-card">
+        
+            <div class="mystery-grid">
+        
+                <div class="field full">
+                    <label>Titolo</label>
+                    <input id="mysteryName" placeholder="Titolo Mystery">
+                </div>
+        
+                <div class="field full">
+                    <label>Descrizione</label>
+                    <textarea id="mysteryDesc" placeholder="Descrizione"></textarea>
+                </div>
+        
+                <div class="field">
+                    <label>Prezzo (€)</label>
+                    <input id="mysteryPrice" type="number" step="0.01">
+                </div>
+        
+                <div class="field">
+                    <label>Valore minimo (€)</label>
+                    <input id="mysteryMin" type="number">
+                </div>
+        
+                <div class="field">
+                    <label>Valore massimo (€)</label>
+                    <input id="mysteryMax" type="number">
+                </div>
+        
+                <div class="field full">
+                    <label>Premi possibili</label>
+        
+                    <div id="rewardsList"></div>
+        
+                    <button type="button" onclick="addRewardField()" style="margin-top:10px;">
+                        + Aggiungi premio
+                    </button>
+                </div>
+        
+                <div class="field full">
+                    <label>Banner URL</label>
+                    <input id="mysteryBanner" placeholder="URL immagine banner">
+                </div>
+        
+            </div>
+        
+            <div class="mystery-actions">
+                <button class="btn-primary" onclick="saveMystery()">
+                    💾 Salva configurazione
+                </button>
+            </div>
+        
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="modal">
+        <div class="modal-box">
+            <h3>Nuovo prodotto</h3>
+            
+            <input type="hidden" id="pid">
+            
+            <div class="modal-grid">
+            
+                <input id="name" class="modal-full" placeholder="Nome prodotto" required>
+            
+                <textarea id="description" class="modal-full" placeholder="Descrizione"></textarea>
+            
+                <select id="tcg" required>
+                    <option value="">TCG</option>
+                    <option value="pokemon">Pokemon</option>
+                    <option value="onepiece">One Piece</option>
+                    <option value="dragonball">Dragon Ball</option>
+                </select>
+            
+                <select id="productType" required>
+                    <option value="">Tipologia</option>
+                    <option value="bustina">Bustina</option>
+                    <option value="display">Display</option>
+                    <option value="box">Box</option>
+                    <option value="etb">ETB</option>
+                </select>
+            
+                <select id="language" required>
+                    <option value="">Lingua</option>
+                    <option value="ita">🇮🇹 IT</option>
+                    <option value="jpn">🇯🇵 JP</option>
+                    <option value="eng">🇬🇧 EN</option>
+                </select>
+            
+                <input id="price" type="number" step="0.01" placeholder="Prezzo (€)" required>
+            
+                <input id="quantity" type="number" min="0" placeholder="Quantità">
+            
+                <input id="image" class="modal-full" placeholder="URL immagine prodotto" oninput="updatePreview()">
+            
+                <div class="image-preview modal-full">
+                    <img id="previewImg" style="display:none;">
+                </div>
+            
+                <div class="modal-full switch-row">
+                    <span>Visibile</span>
+                
+                    <label class="switch">
+                        <input type="checkbox" id="visible" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            
+            </div>
+            
+            <div class="modal-actions">
+                <button onclick="closeModal()">Annulla</button>
+                <button class="btn-primary" onclick="saveProduct()">Salva</button>
+            </div>
+    </div>
+
+    <div style="
+          text-align:center;
+          font-size:11px;
+          opacity:.45;
+          padding:10px 0;
+        ">
+        Website developed by
+        <a href="https://biolinkstudio.it" target="_blank" rel="noopener"
+            style="color:#38bdf8;text-decoration:none;font-weight:500;">
+            BioLink Studio
+        </a>
+    </div>
+
+    <script src="app.js"></script>
+
+    <script>
+
+        let currentView = "catalog";
+
+
+        /*************************************************
+         * WAIT FOR SUPABASE CLIENT READY
+         *************************************************/
+        function waitForSupabase(callback) {
+            const check = setInterval(() => {
+                if (window.supabaseClient) {
+                    clearInterval(check);
+                    callback();
+                }
+            }, 50);
+        }
+
+        /*************************************************
+         * INIT
+         *************************************************/
+        waitForSupabase(async () => {
+
+            const { data: { session } } =
+                await window.supabaseClient.auth.getSession();
+
+            if (!session) {
+                window.location.replace("admin-login.html");
+                return;
+            }
+
+            initAdmin();
+        });
+
+
+        function setView(view) {
+
+                currentView = view;
+
+                const catalogBtn = document.getElementById("viewCatalogBtn");
+                const mysteryBtn = document.getElementById("viewMysteryBtn");
+
+                const catalogSection = document.getElementById("catalogSection");
+                const mysterySection = document.getElementById("mysterySection");
+
+                catalogBtn.classList.remove("btn-primary");
+                mysteryBtn.classList.remove("btn-primary");
+
+                if (view === "catalog") {
+
+                    catalogBtn.classList.add("btn-primary");
+
+                    catalogSection.style.display = "block";
+                    mysterySection.style.display = "none";
+
+                    loadProducts();
+
+                } else {
+
+                    mysteryBtn.classList.add("btn-primary");
+
+                    catalogSection.style.display = "none";
+                    mysterySection.style.display = "block";
+
+                    loadMystery();
+                }
+            }
+        /*************************************************
+         * INIT ADMIN
+         *************************************************/
+        function initAdmin() {
+            loadProducts();
+            loadMystery();
+        }
+
+        async function loadMystery() {
+
+                const { data, error } = await window.supabaseClient
+                    .from("products")
+                    .select("*")
+                    .eq("is_mystery", true)
+                    .single();
+
+                if (error || !data) {
+                    console.log("Nessuna mystery trovata");
+                    return;
+                }
+
+                const rewardsContainer = document.getElementById("rewardsList");
+                rewardsContainer.innerHTML = "";
+
+                (data.mystery_rewards || []).forEach(r => {
+                    addRewardField(r);
+                });
+                document.getElementById("mysteryName").value = data.name || "";
+                document.getElementById("mysteryDesc").value = data.description || "";
+                document.getElementById("mysteryPrice").value = data.price || 0;
+                document.getElementById("mysteryMin").value = data.mystery_min_value || "";
+                document.getElementById("mysteryMax").value = data.mystery_max_value || "";
+                document.getElementById("mysteryBanner").value = data.image || "";
+            }
+
+        function addRewardField(value = "") {
+
+                const container = document.getElementById("rewardsList");
+
+                const wrapper = document.createElement("div");
+                wrapper.style.display = "flex";
+                wrapper.style.gap = "8px";
+                wrapper.style.marginBottom = "8px";
+
+                const input = document.createElement("input");
+                input.type = "text";
+                input.value = value;
+                input.style.flex = "1";
+
+                const removeBtn = document.createElement("button");
+                removeBtn.innerText = "✖";
+                removeBtn.style.background = "#ef4444";
+                removeBtn.style.color = "white";
+                removeBtn.onclick = () => wrapper.remove();
+
+                wrapper.appendChild(input);
+                wrapper.appendChild(removeBtn);
+
+                container.appendChild(wrapper);
+            }
+
+        async function saveMystery() {
+
+                const rewardInputs = document.querySelectorAll("#rewardsList input");
+                const rewards = [];
+
+                rewardInputs.forEach(input => {
+                    if (input.value.trim() !== "") {
+                        rewards.push(input.value.trim());
+                    }
+                });
+
+                const payload = {
+                    name: document.getElementById("mysteryName").value,
+                    description: document.getElementById("mysteryDesc").value,
+                    price: parseFloat(document.getElementById("mysteryPrice").value) || 0,
+                    mystery_min_value: parseFloat(document.getElementById("mysteryMin").value) || 0,
+                    mystery_max_value: parseFloat(document.getElementById("mysteryMax").value) || 0,
+                    mystery_rewards: rewards,
+                    image: document.getElementById("mysteryBanner").value
+                };
+
+                const { error } = await window.supabaseClient
+                    .from("products")
+                    .update(payload)
+                    .eq("is_mystery", true);
+
+                if (error) {
+                    console.error(error);
+                    alert("Errore salvataggio Mystery");
+                    return;
+                }
+
+                alert("Mystery aggiornata!");
+            }
+        /*************************************************
+         * LOAD PRODUCTS
+         *************************************************/
+        async function loadProducts() {
+
+                const search = document.getElementById("adminSearch").value.trim();
+                const typeFilter = document.getElementById("adminTypeFilter").value;
+                const langFilter = document.getElementById("adminLanguageFilter").value;
+
+                let query = window.supabaseClient
+                    .from("products")
+                    .select("*");
+
+                if (currentView === "catalog") {
+                    query = query.eq("is_mystery", false);
+                } else {
+                    query = query.eq("is_mystery", true);
+                }
+
+                if (search) {
+                    query = query.ilike("name", `%${search}%`);
+                }
+
+                if (typeFilter) {
+                    query = query.eq("product_type", typeFilter);
+                }
+
+                if (langFilter) {
+                    query = query.eq("language", langFilter);
+                }
+
+                const { data, error } = await query.order("created_at", { ascending: false });
+
+                if (error) {
+                    console.error("Errore DB:", error);
+                    return;
+                }
+
+                const tbody = document.getElementById("productsTable");
+                tbody.innerHTML = "";
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML =
+                        "<tr><td colspan='8'>Nessun prodotto</td></tr>";
+                    return;
+                }
+
+                data.forEach(p => {
+
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+            <td><img src="${p.image || ''}" style="width:40px"></td>
+            <td>${p.name}</td>
+            <td>€${p.price}</td>
+            <td>${p.tcg}</td>
+            <td>${p.product_type}</td>
+            <td>${p.quantity ?? 0}</td>
+            <td>${p.visible ? "✅" : "❌"}</td>
+            <td>
+                <button onclick="editProduct('${p.id}')">✏️</button>
+                <button onclick="deleteProduct('${p.id}')" style="background:#ef4444;color:white;">🗑</button>
+            </td>
+        `;
+
+                    tbody.appendChild(row);
+                });
+            }
+
+
+        async function deleteProduct(id) {
+                if (!confirm("Sei sicuro di eliminare questo prodotto?")) return;
+
+                const { error } = await window.supabaseClient
+                    .from("products")
+                    .delete()
+                    .eq("id", id);
+
+                if (error) {
+                    console.error(error);
+                    alert("Errore eliminazione");
+                    return;
+                }
+
+                loadProducts();
+            }
+
+            async function editProduct(id) {
+                const { data, error } = await window.supabaseClient
+                    .from("products")
+                    .select("*")
+                    .eq("id", id)
+                    .single();
+
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+
+                document.getElementById("pid").value = data.id;
+                document.getElementById("name").value = data.name;
+                document.getElementById("price").value = data.price;
+                document.getElementById("image").value = data.image;
+                document.getElementById("quantity").value = data.quantity;
+                document.getElementById("visible").checked = data.visible;
+
+                document.getElementById("modal").style.display = "block";
+                updatePreview();
+            }
+
+        async function saveProduct() {
+
+                const id = document.getElementById("pid").value;
+                const payload = {
+                    name: document.getElementById("name").value,
+                    price: parseFloat(document.getElementById("price").value),
+                    image: document.getElementById("image").value,
+                    quantity: parseInt(document.getElementById("quantity").value) || 0,
+                    visible: document.getElementById("visible").checked
+                };
+
+                let query;
+
+                if (id) {
+                    query = window.supabaseClient
+                        .from("products")
+                        .update(payload)
+                        .eq("id", id);
+                } else {
+                    query = window.supabaseClient
+                        .from("products")
+                        .insert(payload);
+                }
+
+                const { error } = await query;
+
+                if (error) {
+                    console.error(error);
+                    alert("Errore salvataggio");
+                    return;
+                }
+
+                closeModal();
+                loadProducts();
+            }
+        
+            function updatePreview() {
+                    const url = document.getElementById("image").value;
+                    const img = document.getElementById("previewImg");
+
+                    if (url) {
+                        img.src = url;
+                        img.style.display = "block";
+                    } else {
+                        img.style.display = "none";
+                    }
+                }
+
+        function openModal() {
+                document.getElementById("pid").value = "";
+                document.getElementById("modal").style.display = "block";
+            }
+
+            function closeModal() {
+                document.getElementById("modal").style.display = "none";
+            }
+        /*************************************************
+         * LOGOUT
+         *************************************************/
+        async function logout() {
+            await window.supabaseClient.auth.signOut();
+            window.location.href = "admin-login.html";
+        }
+
+    </script>
+
+    </body>
+
+</html>

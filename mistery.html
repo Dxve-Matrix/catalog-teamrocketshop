@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mystery Box</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui;
+            background: radial-gradient(circle at 20% 20%, rgba(255,0,0,0.15), transparent 40%),
+                        radial-gradient(circle at 80% 60%, rgba(255,0,0,0.12), transparent 50%),
+                        #000000;
+            color: white;
+            min-height: 100vh;
+        }
+
+        /* HERO */
+        .hero-mistery-section {
+            padding: 80px 20px 40px;
+            text-align: center;
+        }
+
+        .hero-mistery h1 {
+            font-size: 52px;
+            margin: 0;
+            font-weight: 900;
+            letter-spacing: 1px;
+
+            background: linear-gradient(
+                90deg,
+                #ff0000,
+                #ff4d00,
+                #ff9900,
+                #ff4d00,
+                #ff0000
+            );
+            background-size: 300% 300%;
+
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+
+            animation: lavaFlow 6s linear infinite;
+
+            text-shadow:
+                0 0 20px rgba(255, 0, 0, 0.5),
+                0 0 40px rgba(255, 50, 0, 0.3);
+        }
+
+        @keyframes lavaFlow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        .price {
+            margin-top: 15px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #ff2a2a;
+            text-shadow: 0 0 12px rgba(255,0,0,0.6);
+        }
+
+        .container {
+            min-height: 70vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: 60px 20px;
+        }
+
+        .box-card {
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+            padding: 40px;
+            border-radius: 24px;
+
+            background: linear-gradient(145deg, #0a0a0a, #111111);
+            border: 1px solid rgba(255,0,0,0.3);
+
+            box-shadow:
+                0 0 30px rgba(255,0,0,0.15),
+                0 20px 60px rgba(0,0,0,0.8);
+
+            backdrop-filter: blur(10px);
+        }
+
+        #description {
+            font-size: 16px;
+            opacity: .9;
+            margin-bottom: 20px;
+        }
+
+        .range {
+            margin: 20px 0;
+            font-weight: 600;
+            color: #ff4d4d;
+            font-size: 15px;
+        }
+
+        .rewards {
+            margin-top: 30px;
+        }
+
+        .reward-item {
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+
+            background: linear-gradient(90deg, rgba(255,0,0,0.08), rgba(255,0,0,0.02));
+            border: 1px solid rgba(255,0,0,0.2);
+
+            transition: 0.25s ease;
+        }
+
+        .reward-item:hover {
+            transform: translateX(6px);
+            background: linear-gradient(90deg, rgba(255,0,0,0.18), rgba(255,0,0,0.05));
+            border-color: rgba(255,0,0,0.5);
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="logo">
+            <a href="index.html" class="brand">
+                <img id="brandLogo" src="images/logo.png" alt="Brand">
+                <span class="brand-text" id="brandName">Brand</span>
+            </a>
+        </div>
+    
+        <nav class="menu">
+            <a href="index.html">Home</a>
+            <a href="catalogo.html">Prodotti</a>
+        </nav>
+    </header>
+
+    <div class="hero-mistery-section" id="hero-mistery">
+        <div class="hero-mistery">
+            <h1 id="title">Caricamento...</h1>
+            <div class="price" id="price"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="box-card">
+
+            <p id="description"></p>
+
+            <div class="range" id="range"></div>
+
+            <div class="rewards" id="rewardsList"></div>
+
+        </div>
+    </div>
+    <script src="app.js"></script>
+
+    <script>
+        function waitForConfig(callback) {
+            const check = setInterval(() => {
+                if (window.CONFIG && window.CONFIG.supabase?.url) {
+                    clearInterval(check);
+                    callback();
+                }
+            }, 50);
+        }
+
+        waitForConfig(() => {
+
+            const supabase = window.supabase.createClient(
+                CONFIG.supabase.url,
+                CONFIG.supabase.anonKey
+            );
+
+            loadMystery(supabase);
+
+        });
+
+        async function loadMystery(supabase) {
+
+            const { data, error } = await supabase
+                .from("products")
+                .select("*")
+                .eq("is_mystery", true)
+                .single();
+
+            if (error || !data) {
+                document.getElementById("title").innerText = "Mystery non trovata";
+                console.error(error);
+                return;
+            }
+
+            document.getElementById("title").innerText = data.name;
+            document.getElementById("price").innerText = "€" + data.price;
+            document.getElementById("description").innerText = data.description;
+
+            document.getElementById("range").innerText =
+                "Valore garantito tra €" +
+                data.mystery_min_value +
+                " e €" +
+                data.mystery_max_value;
+
+            if (data.image) {
+                document.getElementById("hero-mistery").style.backgroundImage =
+                    `url(${data.image})`;
+            }
+
+            const rewardsContainer = document.getElementById("rewardsList");
+            rewardsContainer.innerHTML = "";
+
+            (data.mystery_rewards || []).forEach(r => {
+                const div = document.createElement("div");
+                div.className = "reward-item";
+                div.innerText = r;
+                rewardsContainer.appendChild(div);
+            });
+        }
+    </script>
+
+</body>
+
+</html>

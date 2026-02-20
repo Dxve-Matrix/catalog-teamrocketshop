@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <title id="pageTitle">Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #0f172a, #0b3c5d, #0ea5e9);
+            padding: 20px;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 360px;
+            padding: 26px 22px 22px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow: 0 35px 80px rgba(0, 0, 0, 0.45);
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .login-box h2 {
+            margin: 0 0 18px;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            border-radius: 14px;
+            border: none;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.96);
+            color: #0f172a;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 800;
+            background: #ffffff;
+            color: #0f172a;
+        }
+
+        .error {
+            margin-top: 10px;
+            color: #ff6b6b;
+            font-size: 13px;
+            display: none;
+        }
+
+        .login-note {
+            margin-top: 14px;
+            font-size: 12px;
+            opacity: 0.75;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-box">
+        <h2 id="adminTitle">Accesso Admin</h2>
+
+        <input id="username" placeholder="Username">
+        <input id="password" type="password" placeholder="Password">
+
+        <button onclick="login()">Accedi</button>
+
+        <p id="error" class="error">Credenziali errate</p>
+
+        <p class="login-note">
+            Area riservata ai seller
+        </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+
+    <script>
+        let supabaseClient = null;
+
+        function waitForConfig(callback) {
+            const check = setInterval(() => {
+                if (window.CONFIG && window.CONFIG.supabase?.url) {
+                    clearInterval(check);
+                    callback();
+                }
+            }, 50);
+        }
+
+        waitForConfig(async () => {
+
+            // branding titolo
+            if (CONFIG.branding?.sellerName) {
+                document.getElementById("pageTitle").textContent =
+                    "Admin – " + CONFIG.branding.sellerName;
+            }
+
+            supabaseClient = window.supabase.createClient(
+                CONFIG.supabase.url,
+                CONFIG.supabase.anonKey
+            );
+
+            // se già loggato → vai admin
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (user) window.location.replace("admin.html");
+        });
+
+        async function login() {
+
+            error.style.display = "none";
+
+            const user = username.value.trim();
+            const pass = password.value;
+
+            if (!user || !pass) {
+                error.textContent = "Inserisci username e password";
+                error.style.display = "block";
+                return;
+            }
+
+            const email = user + "@internal.local";
+
+            const { error: err } =
+                await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password: pass
+                });
+
+            if (err) {
+                error.textContent = "Credenziali errate";
+                error.style.display = "block";
+                return;
+            }
+
+            window.location.href = "admin.html";
+        }
+    </script>
+
+</body>
+
+</html>
