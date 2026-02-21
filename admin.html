@@ -391,6 +391,36 @@
     justify-content: flex-end;
 }
 
+@media (max-width: 768px) {
+
+  body {
+    padding: 12px;
+  }
+
+  .mystery-card {
+    max-width: 100%;
+    width: 100%;
+    padding: 18px;
+    margin: 0;
+  }
+
+  .mystery-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field.full {
+    grid-column: span 1;
+  }
+
+  .mystery-actions {
+    justify-content: stretch;
+  }
+
+  .mystery-actions button {
+    width: 100%;
+  }
+
+}
     </style>
 </head>
 
