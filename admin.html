@@ -132,56 +132,64 @@
             margin-right: 8px;
         }
 
-        /* ===============================
-        ADMIN TABLE – MOBILE CLEAN
-        ================================ */
-        @media (max-width: 768px) {
+       /* ===============================
+    ADMIN TABLE – MOBILE CARDS
+    ================================ */
 
-        /* nascondi colonne inutili */
-        table th:nth-child(1),
-        table td:nth-child(1), /* Img */
+    @media (max-width: 768px) {
 
-        table th:nth-child(4),
-        table td:nth-child(4), /* Categoria */
+    table {
+        border: none;
+    }
 
-        table th:nth-child(5),
-        table td:nth-child(5), /* Espansione */
+    thead {
+        display: none;
+    }
 
-        table th:nth-child(6),
-        table td:nth-child(6), /* Quantità */
+    tbody {
+        display: block;
+    }
 
-        table th:nth-child(7),
-        table td:nth-child(7)  /* Visibile */ {
-            display: none;
-        }
+    tbody tr {
+        display: block;
+        background: #0f172a;
+        margin-bottom: 16px;
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,.08);
+    }
 
-        table {
-            font-size: 14px;
-        }
+    tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border: none;
+        font-size: 14px;
+    }
 
-        td, th {
-            padding: 8px 6px;
-            vertical-align: middle;
-        }
+    tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        opacity: .6;
+    }
 
-        /* Nome più leggibile */
-        table td:nth-child(2) {
-            font-weight: 700;
-        }
+    tbody td img {
+        width: 50px;
+        border-radius: 6px;
+    }
 
-        /* Prezzo compatto */
-        table td:nth-child(3) {
-            white-space: nowrap;
-            font-weight: 600;
-        }
+    tbody td:last-child {
+        justify-content: flex-start;
+        gap: 8px;
+        margin-top: 10px;
+    }
 
-        /* Azioni */
-        table td:nth-child(8) button {
-            padding: 6px 8px;
-            font-size: 14px;
-            margin-right: 4px;
-        }
-        }
+    tbody td button {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+    }
 
         /* ===============================
    MODAL UPGRADE
@@ -808,18 +816,18 @@
                     const row = document.createElement("tr");
 
                     row.innerHTML = `
-            <td><img src="${p.image || ''}" style="width:40px"></td>
-            <td>${p.name}</td>
-            <td>€${p.price}</td>
-            <td>${p.tcg}</td>
-            <td>${p.product_type}</td>
-            <td>${p.quantity ?? 0}</td>
-            <td>${p.visible ? "✅" : "❌"}</td>
-            <td>
-                <button onclick="editProduct('${p.id}')">✏️</button>
-                <button onclick="deleteProduct('${p.id}')" style="background:#ef4444;color:white;">🗑</button>
-            </td>
-        `;
+                    <td data-label="Immagine"><img src="${p.image || ''}"></td>
+                    <td data-label="Nome">${p.name}</td>
+                    <td data-label="Prezzo">€${p.price}</td>
+                    <td data-label="Categoria">${p.tcg}</td>
+                    <td data-label="Tipo">${p.product_type}</td>
+                    <td data-label="Quantità">${p.quantity ?? 0}</td>
+                    <td data-label="Visibile">${p.visible ? "✅" : "❌"}</td>
+                    <td data-label="Azioni">
+                        <button onclick="editProduct('${p.id}')">✏️</button>
+                        <button onclick="deleteProduct('${p.id}')" style="background:#ef4444;color:white;">🗑</button>
+                    </td>
+                    `;
 
                     tbody.appendChild(row);
                 });
