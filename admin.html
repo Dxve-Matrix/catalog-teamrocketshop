@@ -393,15 +393,14 @@
 
 @media (max-width: 768px) {
 
-  body {
-    padding: 12px;
-  }
+    body {
+        padding: 12px;
+    }
 
   .mystery-card {
-    max-width: 100%;
     width: 100%;
+    max-width: 500px;   /* non 100% */
     padding: 18px;
-    margin: 0;
   }
 
   .mystery-grid {
@@ -424,6 +423,12 @@
   overflow-x: hidden;
 }
 }
+
+#mysterySection {
+  display: flex;
+  justify-content: center;
+}
+
     </style>
 </head>
 
