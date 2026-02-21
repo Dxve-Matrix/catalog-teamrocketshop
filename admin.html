@@ -928,13 +928,24 @@
         async function saveProduct() {
 
                 const id = document.getElementById("pid").value;
+
                 const payload = {
-                    name: document.getElementById("name").value,
+                    name: document.getElementById("name").value.trim(),
+                    description: document.getElementById("description").value.trim(),
+                    tcg: document.getElementById("tcg").value,
+                    product_type: document.getElementById("productType").value,
+                    language: document.getElementById("language").value,
                     price: parseFloat(document.getElementById("price").value),
-                    image: document.getElementById("image").value,
+                    image: document.getElementById("image").value.trim(),
                     quantity: parseInt(document.getElementById("quantity").value) || 0,
-                    visible: document.getElementById("visible").checked
+                    visible: document.getElementById("visible").checked,
+                    is_mystery: false
                 };
+
+                if (!payload.tcg || !payload.product_type || !payload.language) {
+                    alert("Compila tutti i campi obbligatori");
+                    return;
+                }
 
                 let query;
 
