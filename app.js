@@ -94,25 +94,10 @@ function applyTheme() {
 function applyLinks() {
 
   setLink("tiktokLink", CONFIG.social?.tiktok);
-  setLink("instagramLink", CONFIG.social?.instagram);
-  setLink("discordLink", CONFIG.social?.discord);
-  setLink("telegramLink", CONFIG.social?.telegram);
+  setLink("whatsappLink", CONFIG.social?.whatsapp);
+  setLink("paypalLink", CONFIG.social?.paypal);
+  setLink("revolutLink", CONFIG.social?.revolut);
 
-  if (CONFIG.contact?.paypalEmail) {
-    const paypalUrl =
-      "https://paypal.me/" + CONFIG.contact.paypalEmail;
-
-    setLink("paypalBtnTop", paypalUrl);
-    setLink("paypalBtnStep", paypalUrl);
-  }
-
-  if (CONFIG.social?.tiktok) {
-    setLink("liveLink", CONFIG.social.tiktok);
-  }
-
-  if (CONFIG.contact?.whatsapp) {
-    setLink("shippingLink", CONFIG.contact.whatsapp);
-  }
 }
 
 /*************************************************
@@ -120,7 +105,11 @@ function applyLinks() {
  *************************************************/
 function setLink(id, url) {
   const el = document.getElementById(id);
-  if (el && url) {
+  if (!el) return;
+
+  if (url && url.trim() !== "") {
     el.href = url;
+  } else {
+    el.style.display = "none";
   }
 }
