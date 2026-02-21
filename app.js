@@ -16,8 +16,8 @@ fetch("./config.json")
     applyBranding();
     applyTheme();
     applyLinks();
+    initPaymentModal(); // chiamata diretta
 
-    // 🔑 Creiamo UNA sola istanza globale Supabase
     window.supabaseClient = window.supabase.createClient(
       CONFIG.supabase.url,
       CONFIG.supabase.anonKey,
@@ -68,6 +68,32 @@ function applyBranding() {
   }
 }
 
+
+function initPaymentModal() {
+
+  const btn = document.getElementById("paypalBtnStep");
+  const modal = document.getElementById("paymentModal");
+  const closeBtn = document.getElementById("closePaymentModal");
+
+  if (!btn || !modal) return;
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    modal.style.display = "flex";
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+  }
+
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  });
+}
 /*************************************************
  * APPLY THEME
  *************************************************/
@@ -93,10 +119,20 @@ function applyTheme() {
  *************************************************/
 function applyLinks() {
 
+  // Footer
   setLink("tiktokLink", CONFIG.social?.tiktok);
   setLink("whatsappLink", CONFIG.social?.whatsapp);
   setLink("paypalLink", CONFIG.social?.paypal);
   setLink("revolutLink", CONFIG.social?.revolut);
+
+  // Sezione acquisto
+  setLink("liveLink", CONFIG.social?.tiktok);
+
+  // Sezione spedizione
+  setLink("shippingLink", CONFIG.social?.whatsapp);
+
+  setLink("modalPaypal", CONFIG.social?.paypal);
+  setLink("modalRevolut", CONFIG.social?.revolut);
 
 }
 
