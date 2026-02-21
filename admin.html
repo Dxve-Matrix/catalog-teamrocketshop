@@ -11,6 +11,10 @@
 
     <style>
 
+        body.modal-open {
+            overflow: hidden;
+        }
+
         *,
         *::before,
         *::after {
@@ -435,6 +439,17 @@
   justify-content: center;
 }
 
+.modal-box {
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .modal-box {
+    margin: 20px;
+    max-height: 90vh;
+  }
+}
     </style>
 </head>
 
@@ -961,10 +976,12 @@
         function openModal() {
                 document.getElementById("pid").value = "";
                 document.getElementById("modal").style.display = "block";
+                document.body.classList.add("modal-open");
             }
 
-            function closeModal() {
+        function closeModal() {
                 document.getElementById("modal").style.display = "none";
+                document.body.classList.remove("modal-open");
             }
         /*************************************************
          * LOGOUT
