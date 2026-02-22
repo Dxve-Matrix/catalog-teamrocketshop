@@ -51,23 +51,83 @@
     opacity: 1;
 }
 
-/* =====================================================
-   MOBILE FIX
-===================================================== */
+/* TOPBAR BASE */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    position: relative;
+    z-index: 1000;
+}
 
+.menu {
+    display: flex;
+    gap: 25px;
+}
+
+/* BURGER */
+.burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.burger span {
+    width: 26px;
+    height: 3px;
+    background: white;
+    border-radius: 3px;
+    transition: 0.3s;
+}
+
+/* ==============================
+   MOBILE — MINIMAL CINEMATIC
+============================== */
 @media (max-width: 768px) {
 
     .brand-text {
         display: none;
-        /* 🔥 solo logo */
     }
 
-    .logo img {
-        height: 70px;
-        /* proporzionato su mobile */
+    .burger {
+        display: flex;
+        z-index: 2001;
     }
 
     .menu {
-        gap: 14px;
+        position: fixed;
+        inset: 0;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        gap: 45px;
+
+        background: rgba(0, 0, 0, 0.96);
+        backdrop-filter: blur(18px);
+
+        transform: translateX(100%);
+        transition: transform 0.5s cubic-bezier(.76, 0, .24, 1);
+    }
+
+    .menu.active {
+        transform: translateX(0);
+    }
+
+    .menu a {
+        font-size: 26px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        opacity: 0.85;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .menu a:active {
+        transform: scale(0.96);
     }
 }

@@ -23,13 +23,19 @@
                 <span class="brand-text" id="brandName">Brand</span>
             </a>
         </div>
-
-        <nav class="menu">
+    
+        <nav class="menu" id="mobileMenu">
             <a href="index.html">Home</a>
             <a href="catalogo.html">Prodotti</a>
             <a href="mistery.html">Mistery Box</a>
             <a href="evento.html">Evento</a>
         </nav>
+    
+        <div class="burger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
     </header>
 
     <!-- CATALOGO -->
@@ -87,7 +93,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js"></script>
     <script src="catalogo.js"></script>
-
+    <script>
+        function toggleMenu() {
+            document.getElementById("mobileMenu").classList.toggle("active");
+        }
+    </script>
 </body>
 
 </html>

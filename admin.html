@@ -8,7 +8,12 @@
 
     <!-- SUPABASE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/footer.css">
     <style>
 
         body.modal-open {
@@ -470,12 +475,33 @@
 
 <body>
 
+
+    <header class="topbar">
+        <div class="logo">
+            <a href="index.html" class="brand">
+                <img id="brandLogo" src="images/logo.png" alt="Brand">
+                <span class="brand-text" id="brandName">Brand</span>
+            </a>
+        </div>
+    
+        <nav class="menu" id="mobileMenu">
+            <a href="index.html">Home</a>
+            <a href="catalogo.html">Prodotti</a>
+            <a href="mistery.html">Mistery Box</a>
+            <a href="evento.html">Evento</a>
+        </nav>
+    
+        <div class="burger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </header>
+
     <div class="top-bar">
         <h1>Pannello Admin</h1>
         <button class="btn-danger" onclick="logout()">Logout</button>
     </div>
-
-    <hr>    
 
     <div style="margin-bottom:20px; display:flex; gap:10px;">
         <button class="btn-primary" id="viewCatalogBtn" onclick="setView('catalog')">
@@ -1343,6 +1369,12 @@
                 document.getElementById("image").value = data.publicUrl;
                 updatePreview();
             }
+    </script>
+
+    <script>
+        function toggleMenu() {
+            document.getElementById("mobileMenu").classList.toggle("active");
+        }
     </script>
 
     </body>
