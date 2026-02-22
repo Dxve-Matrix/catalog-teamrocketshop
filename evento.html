@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evento | Team Rocket Shop</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, sans-serif;
+            background: #0b0b10;
+            color: white;
+        }
+
+        /* ================= HERO ================= */
+
+        .hero {
+            padding: 120px 8%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 70% 40%, rgba(255, 0, 0, 0.15), transparent 60%);
+        }
+
+        .hero-inner {
+            max-width: 1300px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 80px;
+        }
+
+        .hero-left {
+            flex: 1;
+        }
+
+        .hero-right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .hero-right img {
+            max-width: 480px;
+            border-radius: 25px;
+            box-shadow: 0 40px 80px rgba(255, 0, 0, 0.25);
+            transition: 0.4s ease;
+        }
+
+        .hero-right img:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+
+        h1 {
+            font-size: 64px;
+            font-weight: 900;
+            line-height: 1.1;
+            margin: 0;
+        }
+
+        .subtitle {
+            margin-top: 20px;
+            font-size: 20px;
+            opacity: 0.8;
+        }
+
+        .countdown {
+            margin-top: 40px;
+            font-size: 36px;
+            font-weight: 800;
+            color: #ff2b2b;
+        }
+
+        .cta {
+            margin-top: 40px;
+        }
+
+        .cta a {
+            background: linear-gradient(90deg, #ff2b2b, #ff0000);
+            padding: 16px 40px;
+            border-radius: 60px;
+            font-weight: 700;
+            text-decoration: none;
+            color: white;
+            box-shadow: 0 20px 40px rgba(255, 0, 0, 0.3);
+            transition: 0.3s ease;
+        }
+
+        .cta a:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 30px 60px rgba(255, 0, 0, 0.5);
+        }
+
+        /* ================= INFO SECTION ================= */
+
+        .section {
+            max-width: 1200px;
+            margin: 120px auto;
+            padding: 0 8%;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 0, 0, 0.15);
+            border-radius: 25px;
+            padding: 40px;
+            transition: 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(255, 0, 0, 0.6);
+            box-shadow: 0 20px 50px rgba(255, 0, 0, 0.2);
+        }
+
+        .info-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 22px;
+        }
+
+        .info-card p {
+            margin: 0;
+            opacity: 0.85;
+            line-height: 1.7;
+        }
+
+        .event-description {
+            margin-top: 80px;
+            font-size: 18px;
+            line-height: 1.8;
+            opacity: 0.85;
+            max-width: 800px;
+        }
+
+        /* ================= NO EVENT ================= */
+
+        .no-event {
+            padding: 200px 20px;
+            text-align: center;
+            font-size: 28px;
+            opacity: 0.4;
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 900px) {
+            .hero-inner {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero-right img {
+                max-width: 320px;
+            }
+
+            h1 {
+                font-size: 42px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="eventContainer"></div>
+
+    <script>
+        let supabaseClient;
+
+        fetch("./config.json")
+            .then(res => res.json())
+            .then(config => {
+                supabaseClient = window.supabase.createClient(
+                    config.supabase.url,
+                    config.supabase.anonKey
+                );
+                loadEvent();
+            });
+
+        async function loadEvent() {
+            const { data, error } = await supabaseClient
+                .from("events")
+                .select("*")
+                .eq("is_active", true)
+                .maybeSingle();
+
+            if (!data || error) {
+                document.getElementById("eventContainer").innerHTML =
+                    `<div class="no-event">Nessun evento attivo al momento.</div>`;
+                return;
+            }
+
+            renderEvent(data);
+        }
+
+        function renderEvent(data) {
+            document.getElementById("eventContainer").innerHTML = `
+        <div class="hero">
+            <div class="hero-inner">
+
+                <div class="hero-left">
+                    <h1>${data.title}</h1>
+                    <div class="subtitle">${data.subtitle || ""}</div>
+                    <div id="countdown" class="countdown"></div>
+                    <div class="cta">
+                        <a href="${data.cta_link}" target="_blank">${data.cta_text}</a>
+                    </div>
+                </div>
+
+                <div class="hero-right">
+                    <img src="${data.image_url}" alt="Evento">
+                </div>
+
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="info-grid">
+
+                <div class="info-card">
+                    <h3>🔥 36 Slot Disponibili</h3>
+                    <p>Ogni bustina viene assegnata prima della live. Quando finiscono, si chiude.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🎥 Apertura in Diretta</h3>
+                    <p>Apriamo l’intero box live. Le tue carte vengono mostrate in tempo reale.</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>💎 Possibili Pull</h3>
+                    <p>Alt Art • Trainer Gallery • Full Art • Secret Rare.</p>
+                </div>
+
+            </div>
+
+            <div class="event-description">
+                ${data.description || ""}
+            </div>
+        </div>
+    `;
+
+            startCountdown(data.event_date);
+        }
+
+        function startCountdown(eventDate) {
+            const target = new Date(eventDate).getTime();
+            const countdownEl = document.getElementById("countdown");
+
+            setInterval(() => {
+                const now = new Date().getTime();
+                const diff = target - now;
+
+                if (diff <= 0) {
+                    countdownEl.innerText = "LIVE ORA";
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / (1000 * 60)) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+
+                countdownEl.innerText =
+                    `${days}g ${hours}h ${minutes}m ${seconds}s`;
+            }, 1000);
+        }
+    </script>
+
+</body>
+
+</html>

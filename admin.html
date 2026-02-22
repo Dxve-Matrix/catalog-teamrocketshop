@@ -450,6 +450,21 @@
     max-height: 90vh;
   }
 }
+
+.upload-zone {
+    border: 2px dashed rgba(255,255,255,.25);
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    background: #020617;
+    transition: .2s ease;
+}
+
+.upload-zone.dragover {
+    border-color: #38bdf8;
+    background: rgba(56,189,248,.1);
+}
     </style>
 </head>
 
@@ -470,6 +485,10 @@
         <button id="viewMysteryBtn" onclick="setView('mystery')">
             Mystery
         </button>
+    
+        <button id="viewEventsBtn" onclick="setView('events')">
+            Eventi
+        </button>
     </div>
 
     <div id="catalogSection">
@@ -486,6 +505,7 @@
                 <option value="box">Box</option>
                 <option value="etb">ETB</option>
                 <option value="collezione">Collezioni</option>
+                <option value="mystery">Mystery</option>
             </select>
         
             <select id="adminLanguageFilter" onchange="loadProducts()">
@@ -577,6 +597,22 @@
         </div>
     </div>
 
+    <div id="eventsSection" style="display:none;">
+        <h2>Gestione Eventi</h2>
+        <button class="btn-primary" onclick="openEventModal()">+ Nuovo Evento</button>
+    
+        <table>
+            <thead>
+                <tr>
+                    <th>Titolo</th>
+                    <th>Data</th>
+                    <th>Attivo</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody id="eventsTable"></tbody>
+        </table>
+    </div>
     <!-- MODAL -->
     <div id="modal">
         <div class="modal-box">
@@ -603,13 +639,15 @@
                     <option value="display">Display</option>
                     <option value="box">Box</option>
                     <option value="etb">ETB</option>
+                    <option value="collezione">Collezioni</option>
+                    <option value="mystery">Mystery</option>
                 </select>
             
                 <select id="language" required>
                     <option value="">Lingua</option>
                     <option value="ita">🇮🇹 IT</option>
                     <option value="jpn">🇯🇵 JP</option>
-                    <option value="eng">🇬🇧 EN</option>
+                    <option value="chn">🇨🇳 CN</option>
                 </select>
             
                 <input id="price" type="number" step="0.01" placeholder="Prezzo (€)" required>
@@ -617,7 +655,10 @@
                 <input id="quantity" type="number" min="0" placeholder="Quantità">
             
                 <input id="image" class="modal-full" placeholder="URL immagine prodotto" oninput="updatePreview()">
-            
+                <div class="upload-zone modal-full" id="uploadZone">
+                    Trascina immagine qui oppure clicca
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                </div>
                 <div class="image-preview modal-full">
                     <img id="previewImg" style="display:none;">
                 </div>
@@ -637,6 +678,7 @@
                 <button onclick="closeModal()">Annulla</button>
                 <button class="btn-primary" onclick="saveProduct()">Salva</button>
             </div>
+        </div>
     </div>
 
     <div style="
@@ -650,6 +692,47 @@
             style="color:#38bdf8;text-decoration:none;font-weight:500;">
             BioLink Studio
         </a>
+    </div>
+
+    <!-- EVENT MODAL -->
+    <div id="eventModal"
+        style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); backdrop-filter:blur(4px);">
+        <div class="modal-box" style="max-width:700px;">
+            <h3 id="eventModalTitle">Nuovo Evento</h3>
+    
+            <input type="hidden" id="eventId">
+    
+            <div class="modal-grid">
+    
+                <input id="eventTitle" class="modal-full" placeholder="Titolo evento">
+    
+                <input id="eventSubtitle" class="modal-full" placeholder="Sottotitolo">
+    
+                <textarea id="eventDescription" class="modal-full" placeholder="Descrizione evento"></textarea>
+    
+                <input id="eventDate" type="datetime-local">
+    
+                <input id="eventCtaText" placeholder="Testo bottone">
+    
+                <input id="eventCtaLink" class="modal-full" placeholder="Link bottone">
+    
+                <input id="eventImage" class="modal-full" placeholder="URL immagine evento">
+    
+                <div class="modal-full switch-row">
+                    <span>Attivo</span>
+                    <label class="switch">
+                        <input type="checkbox" id="eventActive">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+    
+            </div>
+    
+            <div class="modal-actions">
+                <button onclick="closeEventModal()">Annulla</button>
+                <button class="btn-primary" onclick="saveEvent()">Salva Evento</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
@@ -692,34 +775,218 @@
 
                 currentView = view;
 
-                const catalogBtn = document.getElementById("viewCatalogBtn");
-                const mysteryBtn = document.getElementById("viewMysteryBtn");
-
                 const catalogSection = document.getElementById("catalogSection");
                 const mysterySection = document.getElementById("mysterySection");
+                const eventsSection = document.getElementById("eventsSection");
 
-                catalogBtn.classList.remove("btn-primary");
-                mysteryBtn.classList.remove("btn-primary");
+                catalogSection.style.display = "none";
+                mysterySection.style.display = "none";
+                eventsSection.style.display = "none";
+
+                document.getElementById("viewCatalogBtn").classList.remove("btn-primary");
+                document.getElementById("viewMysteryBtn").classList.remove("btn-primary");
+                document.getElementById("viewEventsBtn").classList.remove("btn-primary");
 
                 if (view === "catalog") {
-
-                    catalogBtn.classList.add("btn-primary");
-
                     catalogSection.style.display = "block";
-                    mysterySection.style.display = "none";
-
+                    document.getElementById("viewCatalogBtn").classList.add("btn-primary");
                     loadProducts();
+                }
 
-                } else {
-
-                    mysteryBtn.classList.add("btn-primary");
-
-                    catalogSection.style.display = "none";
+                if (view === "mystery") {
                     mysterySection.style.display = "block";
-
+                    document.getElementById("viewMysteryBtn").classList.add("btn-primary");
                     loadMystery();
                 }
+
+                if (view === "events") {
+                    eventsSection.style.display = "block";
+                    document.getElementById("viewEventsBtn").classList.add("btn-primary");
+                    loadEvents();
+                }
             }
+
+        
+        async function loadEvents() {
+
+                const { data, error } = await window.supabaseClient
+                    .from("events")
+                    .select("*")
+                    .order("created_at", { ascending: false });
+
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+
+                const tbody = document.getElementById("eventsTable");
+                tbody.innerHTML = "";
+
+                data.forEach(e => {
+
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+            <td>${e.title}</td>
+            <td>${new Date(e.event_date).toLocaleString()}</td>
+            <td>${e.is_active ? "🔥 ATTIVO" : "-"}</td>
+            <td>
+                <button onclick="editEvent('${e.id}')">✏️</button>
+                ${!e.is_active ? `<button onclick="activateEvent('${e.id}')">⚡ Attiva</button>` : ""}
+                <button onclick="deleteEvent('${e.id}')" style="background:#ef4444;color:white;">🗑</button>
+            </td>
+        `;
+
+                    tbody.appendChild(row);
+                });
+            }
+
+        async function activateEvent(id) {
+
+                // Disattiva tutti
+                await window.supabaseClient
+                    .from("events")
+                    .update({ is_active: false })
+                    .neq("id", id);
+
+                // Attiva quello selezionato
+                const { error } = await window.supabaseClient
+                    .from("events")
+                    .update({ is_active: true })
+                    .eq("id", id);
+
+                if (error) {
+                    console.error(error);
+                    alert("Errore attivazione evento");
+                    return;
+                }
+
+                loadEvents();
+            }
+
+        async function deleteEvent(id) {
+                if (!confirm("Eliminare evento?")) return;
+
+                await window.supabaseClient
+                    .from("events")
+                    .delete()
+                    .eq("id", id);
+
+                loadEvents();
+            }  
+            
+        function openEventModal() {
+                document.getElementById("eventId").value = "";
+                document.getElementById("eventModalTitle").innerText = "Nuovo Evento";
+
+                document.getElementById("eventTitle").value = "";
+                document.getElementById("eventSubtitle").value = "";
+                document.getElementById("eventDescription").value = "";
+                document.getElementById("eventDate").value = "";
+                document.getElementById("eventCtaText").value = "";
+                document.getElementById("eventCtaLink").value = "";
+                document.getElementById("eventImage").value = "";
+                document.getElementById("eventActive").checked = false;
+
+                document.getElementById("eventModal").style.display = "block";
+            }
+
+            function closeEventModal() {
+                document.getElementById("eventModal").style.display = "none";
+            }
+
+            async function editEvent(id) {
+
+                const { data, error } = await window.supabaseClient
+                    .from("events")
+                    .select("*")
+                    .eq("id", id)
+                    .single();
+
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+
+                document.getElementById("eventModalTitle").innerText = "Modifica Evento";
+                document.getElementById("eventId").value = data.id;
+                document.getElementById("eventTitle").value = data.title || "";
+                document.getElementById("eventSubtitle").value = data.subtitle || "";
+                document.getElementById("eventDescription").value = data.description || "";
+                document.getElementById("eventDate").value = data.event_date
+                    ? new Date(data.event_date).toISOString().slice(0, 16)
+                    : "";
+                document.getElementById("eventCtaText").value = data.cta_text || "";
+                document.getElementById("eventCtaLink").value = data.cta_link || "";
+                document.getElementById("eventImage").value = data.image_url || "";
+                document.getElementById("eventActive").checked = data.is_active;
+
+                document.getElementById("eventModal").style.display = "block";
+            }
+
+            async function saveEvent() {
+
+                    const id = document.getElementById("eventId").value;
+
+                    const payload = {
+                        title: document.getElementById("eventTitle").value.trim(),
+                        subtitle: document.getElementById("eventSubtitle").value.trim(),
+                        description: document.getElementById("eventDescription").value.trim(),
+                        event_date: document.getElementById("eventDate").value,
+                        cta_text: document.getElementById("eventCtaText").value.trim(),
+                        cta_link: document.getElementById("eventCtaLink").value.trim(),
+                        image_url: document.getElementById("eventImage").value.trim(),
+                        is_active: false  
+                    };
+
+                    if (!payload.title || !payload.event_date) {
+                        alert("Titolo e Data sono obbligatori");
+                        return;
+                    }
+
+                    let savedId;
+                    let error;
+
+                    if (id) {
+                        const { data, error: updateError } = await window.supabaseClient
+                            .from("events")
+                            .update(payload)
+                            .eq("id", id)
+                            .select()
+                            .single();
+
+                        error = updateError;
+                        savedId = data?.id;
+
+                    } else {
+                        const { data, error: insertError } = await window.supabaseClient
+                            .from("events")
+                            .insert(payload)
+                            .select()
+                            .single();
+
+                        error = insertError;
+                        savedId = data?.id;
+                    }
+
+                    if (error) {
+                        console.error(error);
+                        alert("Errore salvataggio evento");
+                        return;
+                    }
+
+                    // Se attivo → usa funzione ufficiale
+                    const shouldActivate = document.getElementById("eventActive").checked;
+
+                    if (shouldActivate && savedId) {
+                        await window.supabaseClient.rpc("activate_event", {
+                            event_id: savedId
+                        });
+                    }
+
+                    closeEventModal();
+                    loadEvents();
+                }
         /*************************************************
          * INIT ADMIN
          *************************************************/
@@ -799,13 +1066,33 @@
                     mystery_min_value: parseFloat(document.getElementById("mysteryMin").value) || 0,
                     mystery_max_value: parseFloat(document.getElementById("mysteryMax").value) || 0,
                     mystery_rewards: rewards,
-                    image: document.getElementById("mysteryBanner").value
+                    image: document.getElementById("mysteryBanner").value,
+                    is_mystery: true,
+                    product_type: "mystery",
+                    visible: true
                 };
 
-                const { error } = await window.supabaseClient
+                // cerca se esiste già una mystery speciale
+                const { data: existing } = await window.supabaseClient
                     .from("products")
-                    .update(payload)
-                    .eq("is_mystery", true);
+                    .select("id")
+                    .eq("is_mystery", true)
+                    .maybeSingle();
+
+                let error;
+
+                if (existing) {
+                    // aggiorna quella esistente
+                    ({ error } = await window.supabaseClient
+                        .from("products")
+                        .update(payload)
+                        .eq("id", existing.id));
+                } else {
+                    // crea nuova
+                    ({ error } = await window.supabaseClient
+                        .from("products")
+                        .insert(payload));
+                }
 
                 if (error) {
                     console.error(error);
@@ -813,7 +1100,7 @@
                     return;
                 }
 
-                alert("Mystery aggiornata!");
+                alert("Mystery speciale salvata!");
             }
         /*************************************************
          * LOAD PRODUCTS
@@ -1006,6 +1293,56 @@
             window.location.href = "admin-login.html";
         }
 
+        const uploadZone = document.getElementById("uploadZone");
+            const fileInput = document.getElementById("fileInput");
+
+            uploadZone.addEventListener("click", () => fileInput.click());
+
+            uploadZone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                uploadZone.classList.add("dragover");
+            });
+
+            uploadZone.addEventListener("dragleave", () => {
+                uploadZone.classList.remove("dragover");
+            });
+
+            uploadZone.addEventListener("drop", async (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove("dragover");
+                const file = e.dataTransfer.files[0];
+                if (file) uploadFile(file);
+            });
+
+            fileInput.addEventListener("change", () => {
+                if (fileInput.files[0]) {
+                    uploadFile(fileInput.files[0]);
+                }
+            });
+
+            async function uploadFile(file) {
+
+                const fileName = Date.now() + "-" + file.name;
+
+                const { error } = await window.supabaseClient
+                    .storage
+                    .from("products")
+                    .upload(fileName, file);
+
+                if (error) {
+                    console.error(error);
+                    alert("Errore upload");
+                    return;
+                }
+
+                const { data } = window.supabaseClient
+                    .storage
+                    .from("products")
+                    .getPublicUrl(fileName);
+
+                document.getElementById("image").value = data.publicUrl;
+                updatePreview();
+            }
     </script>
 
     </body>
