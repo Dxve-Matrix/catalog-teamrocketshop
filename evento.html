@@ -5,15 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evento | Team Rocket Shop</title>
-    <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/header.css">
-    <link rel="stylesheet" href="css/buttons.css">
-    <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="css/modal.css">
-    <link rel="stylesheet" href="css/footer.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            overflow-x: hidden;
+        }
+
         body {
             margin: 0;
             font-family: Inter, system-ui, sans-serif;
@@ -24,7 +30,7 @@
         /* ================= HERO ================= */
 
         .hero {
-            padding: 120px 8%;
+            padding: 120px 100px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -106,13 +112,14 @@
         .section {
             max-width: 1200px;
             margin: 120px auto;
-            padding: 0 8%;
+            padding: 0 40px;
         }
 
         .info-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 40px;
+            justify-items: center;   /* 🔥 centra le card dentro le colonne */
         }
 
         .info-card {
@@ -121,6 +128,8 @@
             border-radius: 25px;
             padding: 40px;
             transition: 0.3s ease;
+            width: 100%;
+            max-width: 360px;
         }
 
         .info-card:hover {
@@ -141,11 +150,12 @@
         }
 
         .event-description {
-            margin-top: 80px;
+            margin: 80px auto 0 auto;   /* 🔥 centra */
             font-size: 18px;
             line-height: 1.8;
             opacity: 0.85;
             max-width: 800px;
+            text-align: center;
         }
 
         /* ================= NO EVENT ================= */
@@ -160,6 +170,23 @@
         /* ================= RESPONSIVE ================= */
 
         @media (max-width: 900px) {
+
+            .hero {
+                padding: 100px 20px;  /* 🔥 riduci padding laterale */
+            }
+
+            .cta {
+                display: flex;
+                justify-content: center;
+            }
+
+            .cta a {
+                width: 100%;
+                max-width: 280px;
+                text-align: center;
+                padding: 14px 20px;
+                font-size: 16px;
+            }
             .hero-inner {
                 flex-direction: column;
                 text-align: center;

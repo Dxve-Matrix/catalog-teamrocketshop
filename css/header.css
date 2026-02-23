@@ -82,6 +82,11 @@
     transition: 0.3s;
 }
 
+html,
+body {
+    overflow-x: hidden;
+}
+
 /* ==============================
    MOBILE — MINIMAL CINEMATIC
 ============================== */
@@ -98,7 +103,11 @@
 
     .menu {
         position: fixed;
-        inset: 0;
+        top: 0;
+        right: 0;
+        height: 100vh;
+        width: 100%;
+        max-width: 100%;
 
         display: flex;
         flex-direction: column;
@@ -112,22 +121,10 @@
 
         transform: translateX(100%);
         transition: transform 0.5s cubic-bezier(.76, 0, .24, 1);
+        overflow: hidden;
     }
 
     .menu.active {
         transform: translateX(0);
-    }
-
-    .menu a {
-        font-size: 26px;
-        font-weight: 600;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        opacity: 0.85;
-        transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .menu a:active {
-        transform: scale(0.96);
     }
 }
